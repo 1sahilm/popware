@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import html2canvas from "html2canvas";
 import { LayoutGrid, Minus, Plus, Text } from "lucide-react";
 import Image from "next/image";
+import { uploadImageToFirebase } from "@/lib/uploadToFirebase";
 
 // Sample product data
 const products = [
@@ -76,6 +77,7 @@ const [activeOption, setActiveOption] = useState("productId");
 
   const templateRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const [templateSize, setTemplateSize] = useState(150);
@@ -177,19 +179,24 @@ function safeColor(colorStr: string): string {
 };
 
 
-const handleCheckout = async () => { 
+const handleCheckout = async () => {
+  const base64Image = await generateFinalImage();
+  if (!base64Image) {
+    alert("Failed to generate image preview.");
+    return;
+  }
+
+  const fileName = `custom-product-${Date.now()}.png`;
+  const firebaseImageUrl = await uploadImageToFirebase(base64Image, fileName);
+
   const payload = {
     title: "Custom Printed Mug",
     price: selectedSizePrice,
-    imageUrl: imageNewUrl,
+    imageUrl: firebaseImageUrl,
     quantity: 1,
     options: {
-      productId: options.productId,
-      templateId: options.templateId,
-      patternId: options.patternId,
-      text: options.text,
-      pic: options.pic,
-      size: options.size
+      ...options,
+      finalImage: firebaseImageUrl,
     },
   };
 
@@ -203,15 +210,15 @@ const handleCheckout = async () => {
 
   if (result.success) {
     if (typeof window !== "undefined") {
-  if (window.parent !== window) { 
-    window.parent.postMessage(
-      { type: "checkout", url: result.checkoutUrl },
-      "*"
-    );
-  } else { 
-    window.location.href = result.checkoutUrl;
-  }
-}
+      if (window.parent !== window) {
+        window.parent.postMessage(
+          { type: "checkout", url: result.checkoutUrl },
+          "*"
+        );
+      } else {
+        window.location.href = result.checkoutUrl;
+      }
+    }
   } else {
     console.error("Error creating draft order:", result.error);
     alert("Failed to checkout.");
@@ -562,16 +569,31 @@ Size
     </div>
   </Draggable>
 )}
+ 
 
-        {/* Picture URL */}
-        {options.pic && (
-          <img
-            src={options.pic}
-            alt="Custom Pic"
-            className="absolute  bottom-0 left-0 max-w-[100px] max-h-[100px]"
-            crossOrigin="anonymous"
-          />
-        )}
+    {options.pic && (
+  <Draggable nodeRef={imageRef as any} bounds="parent">
+    <div
+      ref={imageRef}
+      className="absolute text-black font-bold cursor-move" 
+    >
+      <img
+      src={options.pic}
+      alt="Custom Pic"
+      className="absolute cursor-move"
+      style={{
+        maxWidth: "100px",
+        maxHeight: "100px",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        position: "absolute",
+      }}
+      crossOrigin="anonymous"
+    />
+    </div>
+  </Draggable>
+)}
  <div    className="absolute bottom-[10px]  ">
     {/* Controls */}
     <div className="col-span-2 mt-4 flex flex-wrap gap-4">
