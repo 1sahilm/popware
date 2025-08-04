@@ -10,15 +10,15 @@ import { uploadImageToFirebase } from "@/lib/uploadToFirebase";
 const products = [
   {
     id: "p1",
-    name: "10oz Arena",
+    name: "Pop Glass",
     category: "NATURAL (Compostable)",
-    image: "/images/product-one.png",
+    image: "/images/pop-glass.png",
   },
   {
     id: "p2",
-    name: "12oz Arena",
+    name: "Beer Glass",
     category: "NATURAL (Compostable)",
-    image: "/images/product-two.png",
+    image: "/images/beer-glass.JPG",
   },
 ];
 
@@ -70,10 +70,11 @@ const ProductCustomizer = () => {
   });
 const [activeOption, setActiveOption] = useState("productId");
   const imageNewUrl = "https://bikerzsupermart.com/wp-content/uploads/2024/01/WhatsApp-Image-2023zz-2.png";
-
+const [selectedElement, setSelectedElement] = useState<"text" | "logo" | null>(null);
   const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN
   const SHOPIFY_ADMIN_API_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_API_TOKEN 
   console.log("SHOPIFY_ADMIN_API_TOKEN:", SHOPIFY_ADMIN_API_TOKEN);
+  const [logoSize, setLogoSize] = useState(100); 
 
   const templateRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -556,7 +557,7 @@ Size
         {/* Draggable Text */}
      {options.text && (
   <Draggable nodeRef={textRef as any} bounds="parent">
-    <div
+    {/* <div
       ref={textRef}
       className="absolute text-black font-bold cursor-move"
       style={{
@@ -566,31 +567,87 @@ Size
       }}
     >
       {options.text}
+      
+    </div> */}
+     <div
+      ref={textRef}
+      onClick={() => setSelectedElement("text")}
+      className="absolute cursor-move group"
+      style={{
+        fontSize: `${textSize}px`,
+        background: "transparent",
+        padding: "2px 4px",
+        // position: "relative",
+        display: "inline-block",
+        textAlign: "center",
+      }}
+    >
+      <div className="text-black font-bold">{options.text}</div>
+
+      {/* Delete icon */}
+      {selectedElement === "text" && (
+        <button
+          className="absolute -top-2 -right-2 text-xs rounded-full px-1 shadow"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOptions({ ...options, text: "" });
+            setSelectedElement(null);
+          }}
+          style={{
+            background:"red",
+            color:"#fff"
+          }}
+        >
+          ✕
+        </button>
+      )}
     </div>
   </Draggable>
 )}
  
 
-    {options.pic && (
+   {options.pic && (
   <Draggable nodeRef={imageRef as any} bounds="parent">
     <div
       ref={imageRef}
-      className="absolute text-black font-bold cursor-move" 
-    >
-      <img
-      src={options.pic}
-      alt="Custom Pic"
-      className="absolute cursor-move"
+      onClick={() => setSelectedElement("logo")}
+      className="absolute cursor-move group"
       style={{
-        maxWidth: "100px",
-        maxHeight: "100px",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        position: "absolute",
+        width: `${logoSize}px`,
+        height: `${logoSize}px`, 
+        display: "inline-block",
       }}
-      crossOrigin="anonymous"
-    />
+    >
+      {/* Logo Image */}
+      <img
+        src={options.pic}
+        alt="Custom Pic"
+        className="w-full h-full object-contain"
+        crossOrigin="anonymous"
+        style={{ display: "block" }}
+      />
+
+      {/* Only show buttons when selected */}
+      {selectedElement === "logo" && (
+        <>
+          {/* Delete (✕) */}
+          <button
+            className="absolute -top-2 -right-2 text-xs rounded-full px-1 shadow"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOptions({ ...options, pic: "" });
+              setSelectedElement(null);
+            }}
+             style={{
+            background:"red",
+            color:"#fff"
+          }}
+          >
+            ✕
+          </button>
+ 
+        </>
+      )}
     </div>
   </Draggable>
 )}
@@ -598,7 +655,7 @@ Size
     {/* Controls */}
     <div className="col-span-2 mt-4 flex flex-wrap gap-4">
   {/* Template Size */}
-  <button
+  {/* <button
     aria-label="Increase Template Size"
     className="bg-gray-300 p-2 rounded"
     onClick={() => setTemplateSize((s) => s + 10)}
@@ -611,10 +668,11 @@ Size
     onClick={() => setTemplateSize((s) => Math.max(50, s - 10))}
   >
     <Minus size={20} />
-  </button>
+  </button> */} 
+ 
 
   {/* Pattern Size */}
-  <button
+  {/* <button
     aria-label="Increase Pattern Size"
     className="bg-gray-300 p-2 rounded"
     onClick={() => setPatternSize((s) => s + 10)}
@@ -629,25 +687,71 @@ Size
   >
     <LayoutGrid size={20} />
     <Minus size={16} className="absolute bottom-0 right-0" />
-  </button>
+  </button> */}
 
-  {/* Text Size */}
-  <button
-    aria-label="Increase Text Size"
-    className="bg-gray-300 p-2 rounded"
-    onClick={() => setTextSize((s) => s + 2)}
-  >
-    <Text size={20} />
-    <Plus size={16} className="absolute bottom-0 right-0" />
-  </button>
-  <button
-    aria-label="Decrease Text Size"
-    className="bg-gray-300 p-2 rounded"
-    onClick={() => setTextSize((s) => Math.max(8, s - 2))}
-  >
-    <Text size={20} />
-    <Minus size={16} className="absolute bottom-0 right-0" />
-  </button>
+  {/* Logo Size */}
+ <div className="flex gap-4">  
+  <div className="flex flex-col items-center">
+    <button
+      aria-label="Increase Logo Size"
+      className="bg-gray-300 p-2 rounded relative"
+       onClick={(e) => {
+              e.stopPropagation();
+              setLogoSize((prev) => Math.min(prev + 10, 300)); // limit max size
+            }}
+    >
+      <Text size={20} />
+      <Plus size={16} className="absolute bottom-0 right-0" />
+    </button> 
+    <span className="mt-1 text-sm text-gray-700">Logo Plus</span>
+  </div>
+
+  <div className="flex flex-col items-center">
+    <button
+      aria-label="Decrease Text Size"
+      className="bg-gray-300 p-2 rounded relative"
+        onClick={(e) => {
+              e.stopPropagation();
+              setLogoSize((prev) => Math.max(prev - 10, 30));  
+            }}
+
+    >
+      <Text size={20} />
+      <Minus size={16} className="absolute bottom-0 right-0" />
+    </button>
+    <span className="mt-1 text-sm text-gray-700">Logo Minus</span>
+  </div>
+</div>
+
+
+
+ <div className="flex gap-4">  
+  <div className="flex flex-col items-center">
+    <button
+      aria-label="Increase Text Size"
+      className="bg-gray-300 p-2 rounded relative"
+        onClick={() => setTextSize((s) => s + 2)}
+    >
+      <Text size={20} />
+      <Plus size={16} className="absolute bottom-0 right-0" />
+    </button>
+    <span className="mt-1 text-sm text-gray-700">Text Plus</span>
+  </div>
+
+  <div className="flex flex-col items-center">
+    <button
+      aria-label="Decrease Text Size"
+      className="bg-gray-300 p-2 rounded relative"
+      onClick={() => setTextSize((s) => Math.max(8, s - 2))}
+
+    >
+      <Text size={20} />
+      <Minus size={16} className="absolute bottom-0 right-0" />
+    </button>
+    <span className="mt-1 text-sm text-gray-700">Text Minus</span>
+  </div>
+</div>
+
 </div>
   </div>
       </div>
