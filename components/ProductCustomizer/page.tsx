@@ -228,7 +228,7 @@ const handleCheckout = async () => {
 
 
   return (
- <div className="flex  max-[640px]:flex max-[640px]:flex-col-reverse    " style={{ gap: "20px" }}
+ <div className="flex  max-[640px]:flex max-[640px]:flex-col-reverse    " 
  
  >
      
@@ -651,9 +651,9 @@ Size
     </div>
   </Draggable>
 )}
- <div    className="absolute bottom-[10px]  ">
+ <div    className="absolute bottom-[0px]  mt-10">
     {/* Controls */}
-    <div className="col-span-2 mt-4 flex flex-wrap gap-4">
+    <div className="col-span-2 mt-10 flex flex-wrap gap-4 justify-center">
   {/* Template Size */}
   {/* <button
     aria-label="Increase Template Size"
@@ -751,9 +751,13 @@ Size
     <span className="mt-1 text-sm text-gray-700">Text Minus</span>
   </div>
 </div>
-
 </div>
+<div className="text-center mt-4 text-sm text-gray-600">
+  <p>Drag the logo as per your preferred placement on Cup</p> 
+</div> 
+
   </div>
+  
       </div>
 
       
